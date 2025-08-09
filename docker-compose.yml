@@ -1,0 +1,17 @@
+services:
+  db:
+    image: bitnami/postgresql:latest
+    container_name: invile-linkpostgres
+    environment:
+      - POSTGRES_USERNAME=docker
+      - POSTGRES_PASSWORD=docker
+      - POSTGRES_DATABASE=invite-link
+    ports:
+      - "5433:5432"
+  
+  connect-redis:
+    image: bitnami/redis:latest
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - "6379:6379"
