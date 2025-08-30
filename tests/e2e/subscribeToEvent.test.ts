@@ -1,71 +1,38 @@
-import { subscribeToEventController } from "../../src/controllers/subscribeToEventController";
-import { redis } from "../../src/lib/redis";
-import { db } from "../../src/lib/prisma";
-import { Request, Response, NextFunction } from "express";
+import request from "supertest"
+import { app } from "../../src/app"
+import { redis } from "../../src/lib/redis"
 
-jest.mock("../../src/lib/prisma", () => ({
-  db: {
-    subscription: {
-      findUnique: jest.fn(),
-      create: jest.fn()
-    }
-  }
-}));
 jest.mock("../../src/lib/redis", () => ({
   redis: { zincrby: jest.fn() }
-}));
+}))
 
 describe("E2E - subscribeToEvent", () => {
-  const mockRes = () => {
-    const res: Partial<Response> = {};
-    res.status = jest.fn().mockReturnValue(res);
-    res.redirect = jest.fn();
-    res.json = jest.fn().mockReturnValue(res);
-    return res as Response;
-  };
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+  it("should subscribe user without incrementing rank", async () => {
+    const res = await request(app)
+      .post(`/subscriptions`)
+      .send({ name: "Fulano", email: "fulano@email.com" })
+      .expect(201)
 
-  it("should subscriber user to event without increment rank", async () => {
-    const req = { body: { name: "Fulano", email: "fulano@email.com" } } as unknown as Request;
-    const next = {} as NextFunction;
-    const res = mockRes();
-    (db.subscription.findUnique as jest.Mock).mockResolvedValue(null);
-    (db.subscription.create as jest.Mock).mockResolvedValue({
-      id: "8405d0a5-d3b5-4fb4-937f-ec4aa5df4fbd",
-      name: "Fulano",
-      email: "fulano@email.com"
-    });
-    await subscribeToEventController(req, res, next);
-    expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith({ subscriberId: "8405d0a5-d3b5-4fb4-937f-ec4aa5df4fbd" });
+    expect(res.body).toHaveProperty("subscriberId")
     expect(redis.zincrby).not.toHaveBeenCalled()
-  });
+  }, 99000)
 
-  it("should subscriber user to event with increment rank", async () => {
-    const req = {
-      body: {
-        name: "Fulano",
-        email: "fulano@email.com",
-        referrer: "7405d0a5-d3b5-4fb4-937f-ec4aa5df4fbc"
-      }
-    } as unknown as Request;
-    const next = {} as NextFunction;
-    const res = mockRes();
-    (db.subscription.findUnique as jest.Mock).mockResolvedValue(null);
-    (db.subscription.create as jest.Mock).mockResolvedValue({
-      id: "8405d0a5-d3b5-4fb4-937f-ec4aa5df4fbd",
-      name: "Fulano",
-      email: "fulano@email.com",
-    });
-    await subscribeToEventController(req, res, next);
-    expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith({ subscriberId: "8405d0a5-d3b5-4fb4-937f-ec4aa5df4fbd" });
+  it("should subscribe user with incrementing rank", async () => {
+    const referrerId = "7405d0a5-d3b5-4fb4-937f-ec4aa5df4fbc"
+    const res = await request(app)
+      .post(`/subscriptions`)
+      .send({
+        name: "Beltrano",
+        email: "beltrano@email.com",
+        referrer: referrerId,
+      })
+      .expect(201)
+    expect(res.body).toHaveProperty("subscriberId")
     expect(redis.zincrby).toHaveBeenCalledWith(
       "referral:ranking",
       1,
-      "7405d0a5-d3b5-4fb4-937f-ec4aa5df4fbc",
+      referrerId
     )
-  });
-});
+  }, 99000)
+})
+

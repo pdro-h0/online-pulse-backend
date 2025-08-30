@@ -2,7 +2,7 @@ import { db } from "../lib/prisma"
 import { redis } from "../lib/redis"
 
 export const getRanking = async () => {
-  const threeBest = await redis.zrange("referral:ranking", 0, 2, "WITHSCORES")
+  const threeBest = await redis.zrevrange("referral:ranking", 0, 2, "WITHSCORES")
   const ranking: Record<string, number> = {}
   for (let i = 0; i < threeBest.length; i += 2) {
     ranking[threeBest[i]] = Number(threeBest[i + 1])

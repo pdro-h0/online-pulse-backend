@@ -4,11 +4,9 @@ const tsJestTransformCfg = createDefaultPreset().transform;
 
 /** @type {import("jest").Config} **/
 module.exports = {
-  testEnvironment: "node",
+  testEnvironment: './prisma/prisma-test-environment.ts',
   transform: {
     ...tsJestTransformCfg,
   },
-  globalSetup: '<rootDir>/tests/jest.global-setup.ts',
-  globalTeardown: '<rootDir>/tests/jest.global-teardown.ts',
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"]
 };

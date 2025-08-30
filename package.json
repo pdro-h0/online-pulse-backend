@@ -4,7 +4,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx watch --env-file .env src/server.ts",
-    "test:e2e": "npx jest ./tests/e2e"
+    "test:e2e:mock": "npx jest --config ./jest.config.js --runInBand --forceExit ./tests/e2e",
+    "test:e2e": "jest --watch --config jest-e2e.config.js tests/e2e",
+    "db:seed": "tsx --env-file .env ./prisma/seed.ts"
   },
   "keywords": [],
   "author": "",
@@ -15,7 +17,9 @@
     "@types/express": "^5.0.3",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.1.0",
+    "@types/pg": "^8.15.5",
     "@types/supertest": "^6.0.3",
+    "pg": "^8.16.3",
     "prisma": "^6.13.0",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3"
