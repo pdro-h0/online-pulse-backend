@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "tsx watch --env-file .env src/server.ts",
     "build": "tsup src",
-    "start": "node --env-file .env dist/server.js",
+    "start": "node dist/server.js",
     "test:e2e": "jest --watch --config jest-e2e.config.js tests/e2e",
     "test:coverage": "jest --coverage --config jest-e2e.config.js tests/e2e",
     "db:seed": "tsx --env-file .env ./prisma/seed.ts"
