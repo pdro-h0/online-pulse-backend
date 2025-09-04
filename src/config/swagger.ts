@@ -14,7 +14,7 @@ const options: swaggerJSDoc.Options = {
     },
     servers: [
       {
-        url: "http://online-pulse-backend.onrender.com",
+        url: "https://online-pulse-backend.onrender.com",
       },
       {
         url: `http://localhost:${env.PORT}`,
